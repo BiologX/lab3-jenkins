@@ -1,63 +1,54 @@
 pipeline {
     agent any
     
+    // Добавляем параметр выбора
+    parameters {
+        choice(
+            name: 'BRANCH',
+            choices: ['development', 'staging', 'production'],
+            description: 'Для лабораторной: выберите одну из 3 веток'
+        )
+    }
+    
     stages {
-        stage('Checkout') {
+        stage('Лабораторная работа №3') {
             steps {
-                echo 'Checking out code from Git'
-                checkout scm
+                echo "Конвейер непрерывной интеграции Jenkins"
+                echo "Выбрана ветка: ${params.BRANCH}"
             }
         }
         
-        stage('Build') {
+        stage('Этап 1: Проверка кода') {
             steps {
-                echo 'Building project...'
-                // Для Windows используем bat вместо sh
-                bat 'echo "Build step completed on Windows"'
+                bat 'echo "Проверка кода для ветки ${params.BRANCH}"'
             }
         }
         
-        stage('Test') {
+        stage('Этап 2: Сборка') {
             steps {
                 script {
-                    // Определяем поведение для разных веток
-                    if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'main') {
-                        echo "Running main branch pipeline"
-                        bat 'echo "Main branch tests"'
-                    } else if (env.BRANCH_NAME == 'development') {
-                        echo "Running development branch pipeline"
-                        bat 'echo "Development tests"'
-                    } else if (env.BRANCH_NAME == 'staging') {
-                        echo "Running staging branch pipeline"
-                        bat 'echo "Staging tests"'
-                    } else if (env.BRANCH_NAME == 'production') {
-                        echo "Running production branch pipeline"
-                        bat 'echo "Production deployment"'
-                    } else {
-                        echo "Unknown branch: ${env.BRANCH_NAME}"
-                        bat 'echo "Default pipeline"'
+                    switch(params.BRANCH) {
+                        case 'development':
+                            bat 'echo "Сборка DEV версии"'
+                            break
+                        case 'staging':
+                            bat 'echo "Сборка STAGING версии"'
+                            break
+                        case 'production':
+                            bat 'echo "Сборка PRODUCTION версии"'
+                            break
                     }
                 }
             }
         }
         
-        stage('Final') {
+        stage('Этап 3: Деплой') {
             steps {
-                bat 'dir'  // Показать содержимое директории
-                echo "Pipeline completed for branch: ${env.BRANCH_NAME}"
+                bat 'echo "Деплой завершен успешно!"'
+                echo "Лабораторная работа №3 выполнена"
+                echo "Репозиторий: https://github.com/BiologX/lab3-jenkins"
+                echo "Ветки: development, staging, production"
             }
-        }
-    }
-    
-    post {
-        always {
-            echo "Pipeline finished"
-        }
-        success {
-            echo "SUCCESS!"
-        }
-        failure {
-            echo "FAILED!"
         }
     }
 }
